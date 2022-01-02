@@ -13,19 +13,20 @@ public class Bottle : MonoBehaviour
         
     }
 
-    public void Initialize()
+    public bool Fill(Color fillColor)
     {
-        for (int i = 3; i >= 0; i--)
-        {
-            Color randomColor = GameController.instance.bottleColors[Random.Range(0, GameController.instance.bottleColors.Count)];
-            currentColors.Add(randomColor);
-            transform.GetChild(i).GetComponent<SpriteRenderer>().color = randomColor;
-        }
+       if(currentColors.Count>=4)
+       {
+          return false;
+       }
+        currentColors.Add(fillColor);
+        transform.GetChild(4 - currentColors.Count).GetComponent<SpriteRenderer>().color = fillColor;
+        return true;
     }
 
     public void EmptyBottle()
     {
-        for(int i=0; i < currentColors.Count; i++)
+        for(int i=0; i < transform.childCount; i++)
         {
             transform.GetChild(i).GetComponent<SpriteRenderer>().color = Color.clear;
         }
@@ -46,15 +47,15 @@ public class Bottle : MonoBehaviour
 
     public void TransferColors(Bottle secondBottle)
     {
-        if(secondBottle.currentColors.Count==0)
-        {
-            secondBottle.currentColors.Add(this.currentColors[currentColors.Count - 1]);
-            secondBottle.transform.GetChild(4 - secondBottle.currentColors.Count).GetComponent<SpriteRenderer>().color = currentColors[currentColors.Count - 1];
-            transform.GetChild(4-currentColors.Count).GetComponent<SpriteRenderer>().color = Color.clear;
-            currentColors.RemoveAt(currentColors.Count - 1);
-        }
-
-        else
+        //if(secondBottle.currentColors.Count==0)
+        //{
+        //    secondBottle.currentColors.Add(this.currentColors[currentColors.Count - 1]);
+        //    secondBottle.transform.GetChild(4 - secondBottle.currentColors.Count).GetComponent<SpriteRenderer>().color = currentColors[currentColors.Count - 1];
+        //    transform.GetChild(4-currentColors.Count).GetComponent<SpriteRenderer>().color = Color.clear;
+        //    currentColors.RemoveAt(currentColors.Count - 1);
+        //}
+        //else 
+        if(secondBottle.currentColors.Count < 4)
         {
             MatchColors(secondBottle);
         }
@@ -62,15 +63,31 @@ public class Bottle : MonoBehaviour
 
     public void MatchColors(Bottle secondBottle)
     {
-        Color firstColor = currentColors[currentColors.Count - 1];
-        Color secondColor = secondBottle.currentColors[secondBottle.currentColors.Count - 1];
-        if(firstColor==secondColor)
+        Color secondColor = secondBottle.currentColors.Count > 0 ? secondBottle.currentColors[secondBottle.currentColors.Count - 1] : Color.clear;
+        
+        int i = currentColors.Count - 1;
+        do
         {
-            secondBottle.currentColors.Add(this.currentColors[currentColors.Count - 1]);
-            secondBottle.transform.GetChild(4 - secondBottle.currentColors.Count).GetComponent<SpriteRenderer>().color = currentColors[currentColors.Count - 1];
-            transform.GetChild(4 - currentColors.Count).GetComponent<SpriteRenderer>().color = Color.clear;
-            currentColors.RemoveAt(currentColors.Count - 1);
-        }
+            Color firstColor = currentColors[i];
+            if (secondColor == Color.clear || firstColor == secondColor)
+            {
+                secondBottle.currentColors.Add(firstColor);
+                secondBottle.transform.GetChild(4 - secondBottle.currentColors.Count).GetComponent<SpriteRenderer>().color = currentColors[i];
+                transform.GetChild(4 - currentColors.Count).GetComponent<SpriteRenderer>().color = Color.clear;
+                currentColors.RemoveAt(i);
+
+                if(secondColor == Color.clear)
+                {
+                    secondColor = firstColor;
+                }
+            }
+            else
+            {
+                break;
+            }
+
+            i--;
+        } while ((i >= 0 && secondBottle.currentColors.Count < 4));  
     }
     
 }

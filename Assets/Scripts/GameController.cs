@@ -9,6 +9,7 @@ public class GameController : MonoBehaviour
     public GameObject bottlePrefab;
     float bottlePositionOffset = 2f;
     public List<Color> bottleColors = new List<Color>();
+    public List<Bottle> bottles = new List<Bottle>();
 
     private void Awake()
     {
@@ -24,19 +25,30 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
-        for(int i=0 ; i < 5; i++)
+        for (int j = 0; j < 2; j++)
         {
-            for (int j = 0; j < 2; j++)
+            for (int i=0 ; i < 6; i++)
             {
                 GameObject go = Instantiate(bottlePrefab);
                 go.transform.position = new Vector2(-5.2f + bottlePositionOffset * i, 1.5f - 4.0f * j);
-                go.transform.GetComponent<Bottle>().Initialize();
 
-                if (j * 5 + i >= 8)
+                if (j * 5 + i >=9)
                 {
                     go.transform.GetComponent<Bottle>().EmptyBottle();
                 }
+                bottles.Add(go.transform.GetComponent<Bottle>());
+            }
+        }
+
+        foreach(Color c in bottleColors)
+        {
+                for(int i=0; i < 4; i++)
+                {
+                int randomnumber = Random.Range(0, 10);
+                while (bottles[randomnumber].GetComponent<Bottle>().Fill(c) == false)
+                {
+                    randomnumber = Random.Range(0, 10);
+                } 
             }
         }
 
@@ -61,7 +73,7 @@ public class GameController : MonoBehaviour
             currentBottle.transform.GetComponent<Bottle>().TransferColors(newBottle.transform.GetComponent<Bottle>());
             currentBottle.transform.GetComponent<Bottle>().ToggleAnimation();
             currentBottle = newBottle;
-            currentBottle.transform.GetComponent<Bottle>().ToggleAnimation();
+            //currentBottle.transform.GetComponent<Bottle>().ToggleAnimation();
             currentBottle = null;
         }
         else

@@ -185,13 +185,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentColors: []
-  childrenCount: 0
-  childs:
-  - {fileID: 3832560316870097634}
-  - {fileID: 3832560316897143625}
-  - {fileID: 3832560315071327790}
-  - {fileID: 3832560316701404689}
-  emptyBottle: 0
 --- !u!95 &7880606714279492661
 Animator:
   serializedVersion: 3
