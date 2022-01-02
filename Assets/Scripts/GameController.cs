@@ -4,13 +4,27 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+    public class Steps
+    {
+        public Steps(Bottle a, Bottle b, int p)
+        {
+            firstBottle = a;
+            secondBottle = b;
+            partsCount = p;
+        }
+        public Bottle firstBottle;
+        public Bottle secondBottle;
+        public int partsCount;
+    }
     public static GameController instance;
     public GameObject currentBottle = null;
     public GameObject bottlePrefab;
     float bottlePositionOffset = 2f;
     public List<Color> bottleColors = new List<Color>();
     public List<Bottle> bottles = new List<Bottle>();
-
+    List<List<Color>> bottlesinitialState = new List<List<Color>>();
+    public List<Steps> stepsHistory = new List<Steps>();
+    public bool canReverse = false;
     private void Awake()
     {
         if(instance==null)
@@ -52,6 +66,11 @@ public class GameController : MonoBehaviour
             }
         }
 
+        foreach(var b in bottles)
+        {
+            bottlesinitialState.Add(new List<Color>(b.currentColors));
+        }
+
         PlayerInput.OnBottleTouchDelegate += OnBottleTouch;
     }
 
@@ -70,10 +89,13 @@ public class GameController : MonoBehaviour
         }
         else if (currentBottle != newBottle)
         {
-            currentBottle.transform.GetComponent<Bottle>().TransferColors(newBottle.transform.GetComponent<Bottle>());
+            int pCount = currentBottle.transform.GetComponent<Bottle>().TransferColors(newBottle.transform.GetComponent<Bottle>());
+            if (pCount > 0 && canReverse == false)
+            {
+                stepsHistory.Add(new Steps(currentBottle.GetComponent<Bottle>(), newBottle.GetComponent<Bottle>(), pCount));
+            }
             currentBottle.transform.GetComponent<Bottle>().ToggleAnimation();
             currentBottle = newBottle;
-            //currentBottle.transform.GetComponent<Bottle>().ToggleAnimation();
             currentBottle = null;
         }
         else
@@ -81,6 +103,7 @@ public class GameController : MonoBehaviour
             currentBottle.transform.GetComponent<Bottle>().ToggleAnimation();
             currentBottle = null;
         }
+        
     }
 
     private void OnDisable()
@@ -88,4 +111,31 @@ public class GameController : MonoBehaviour
         PlayerInput.OnBottleTouchDelegate -= OnBottleTouch;
     }
 
+    public void UndoLastStep()
+    {
+        if (stepsHistory.Count > 0)
+        {
+            for (int i = 0; i < stepsHistory[stepsHistory.Count - 1].partsCount; i++)
+            {
+                stepsHistory[stepsHistory.Count - 1].secondBottle.Transfer(stepsHistory[stepsHistory.Count - 1].firstBottle);
+            }
+            stepsHistory.RemoveAt(stepsHistory.Count - 1);
+        }
+        canReverse = false;
+    }
+
+    public void Reset()
+    {
+        for (int i = 0; i < bottlesinitialState.Count - 2; i++)
+        {
+            bottles[i].currentColors = new List<Color>();
+            for (int j = 0; j < 4; j++)
+            {
+                bottles[i].Fill(bottlesinitialState[i][j]);
+            }
+        }
+
+        bottles[bottles.Count - 1].EmptyBottle();
+        bottles[bottles.Count - 2].EmptyBottle();
+    }
 }
